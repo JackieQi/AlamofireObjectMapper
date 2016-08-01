@@ -1,2 +1,2 @@
 github "Alamofire/Alamofire" "swift3"
-github "Hearst-DD/ObjectMapper" "swift-3"
+github "https://github.com/JackieQi/ObjectMapper" "swift-3"
