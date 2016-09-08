@@ -32,7 +32,7 @@ import ObjectMapper
 
 extension Request {
     
-    internal static func newError(_ code: Error.Code, failureReason: String) -> NSError {
+    internal static func newError(_ code: ErrorCode, failureReason: String) -> NSError {
         let errorDomain = "com.alamofireobjectmapper.error"
         
         let userInfo = [NSLocalizedFailureReasonErrorKey: failureReason]
@@ -107,7 +107,7 @@ extension Request {
             let result = JSONResponseSerializer.serializeResponse(request, response, data, error)
             
             let JSONToMap: AnyObject?
-            if let keyPath = keyPath , keyPath.isEmpty == false {
+            if let keyPath = keyPath, keyPath.isEmpty == false {
                 JSONToMap = result.value?.value(forKeyPath: keyPath)
             } else {
                 JSONToMap = result.value
