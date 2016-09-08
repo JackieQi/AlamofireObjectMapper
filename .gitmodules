@@ -1,6 +1,7 @@
 [submodule "Carthage/Checkouts/ObjectMapper"]
 	path = Carthage/Checkouts/ObjectMapper
 	url = https://github.com/JackieQi/ObjectMapper.git
+	branch = swift-3
 [submodule "Carthage/Checkouts/Alamofire"]
 	path = Carthage/Checkouts/Alamofire
 	url = https://github.com/Alamofire/Alamofire.git

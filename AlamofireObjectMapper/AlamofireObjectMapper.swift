@@ -30,19 +30,23 @@ import Foundation
 import Alamofire
 import ObjectMapper
 
-extension Request {
+extension DataRequest {
+    enum ErrorCode: Int {
+        case noData = 1
+        case dataSerializationFailed = 2
+    }
     
     internal static func newError(_ code: ErrorCode, failureReason: String) -> NSError {
         let errorDomain = "com.alamofireobjectmapper.error"
-        
+      
         let userInfo = [NSLocalizedFailureReasonErrorKey: failureReason]
         let returnError = NSError(domain: errorDomain, code: code.rawValue, userInfo: userInfo)
-        
+      
         return returnError
     }
     
-    public static func ObjectMapperSerializer<T: Mappable>(_ keyPath: String?, mapToObject object: T? = nil, context: MapContext? = nil) -> ResponseSerializer<T, NSError> {
-        return ResponseSerializer { request, response, data, error in
+    public static func ObjectMapperSerializer<T: Mappable>(_ keyPath: String?, mapToObject object: T? = nil, context: MapContext? = nil) -> DataResponseSerializer<T> {
+        return DataResponseSerializer { request, response, data, error in
             guard error == nil else {
                 return .failure(error!)
             }
@@ -53,12 +57,12 @@ extension Request {
                 return .failure(error)
             }
             
-            let JSONResponseSerializer = Request.JSONResponseSerializer(options: .allowFragments)
-            let result = JSONResponseSerializer.serializeResponse(request, response, data, error)
+            let jsonResponseSerializer = DataRequest.jsonResponseSerializer(options: .allowFragments)
+            let result = jsonResponseSerializer.serializeResponse(request, response, data, error)
         
-            let JSONToMap: AnyObject?
-            if let keyPath = keyPath , keyPath.isEmpty == false {
-                JSONToMap = result.value?.value(forKeyPath: keyPath)
+            let JSONToMap: Any?
+            if let keyPath = keyPath, keyPath.isEmpty == false {
+                JSONToMap = (result.value as AnyObject?)?.value(forKeyPath: keyPath)
             } else {
                 JSONToMap = result.value
             }
@@ -87,12 +91,12 @@ extension Request {
      - returns: The request.
      */
     
-    public func responseObject<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, mapToObject object: T? = nil, context: MapContext? = nil, completionHandler: (Response<T, NSError>) -> Void) -> Self {
-        return response(queue: queue, responseSerializer: Request.ObjectMapperSerializer(keyPath, mapToObject: object, context: context), completionHandler: completionHandler)
+    public func responseObject<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, mapToObject object: T? = nil, context: MapContext? = nil, completionHandler: @escaping (DataResponse<T>) -> Void) -> Self {
+        return response(queue: queue, responseSerializer: DataRequest.ObjectMapperSerializer(keyPath, mapToObject: object, context: context), completionHandler: completionHandler)
     }
     
-    public static func ObjectMapperArraySerializer<T: Mappable>(_ keyPath: String?, context: MapContext? = nil) -> ResponseSerializer<[T], NSError> {
-        return ResponseSerializer { request, response, data, error in
+    public static func ObjectMapperArraySerializer<T: Mappable>(_ keyPath: String?, context: MapContext? = nil) -> DataResponseSerializer<[T]> {
+        return DataResponseSerializer { request, response, data, error in
             guard error == nil else {
                 return .failure(error!)
             }
@@ -103,12 +107,12 @@ extension Request {
                 return .failure(error)
             }
             
-            let JSONResponseSerializer = Request.JSONResponseSerializer(options: .allowFragments)
-            let result = JSONResponseSerializer.serializeResponse(request, response, data, error)
+            let jsonResponseSerializer = DataRequest.jsonResponseSerializer(options: .allowFragments)
+            let result = jsonResponseSerializer.serializeResponse(request, response, data, error)
             
-            let JSONToMap: AnyObject?
+            let JSONToMap: Any?
             if let keyPath = keyPath, keyPath.isEmpty == false {
-                JSONToMap = result.value?.value(forKeyPath: keyPath)
+                JSONToMap = (result.value as AnyObject?)?.value(forKeyPath: keyPath)
             } else {
                 JSONToMap = result.value
             }
@@ -132,7 +136,7 @@ extension Request {
      
      - returns: The request.
     */
-    public func responseArray<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, context: MapContext? = nil, completionHandler: (Response<[T], NSError>) -> Void) -> Self {
-        return response(queue: queue, responseSerializer: Request.ObjectMapperArraySerializer(keyPath, context: context), completionHandler: completionHandler)
+    public func responseArray<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, context: MapContext? = nil, completionHandler: @escaping (DataResponse<[T]>) -> Void) -> Self {
+        return response(queue: queue, responseSerializer: DataRequest.ObjectMapperArraySerializer(keyPath, context: context), completionHandler: completionHandler)
     }
 }
