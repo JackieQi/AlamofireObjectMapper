@@ -31,6 +31,7 @@ import Alamofire
 import ObjectMapper
 
 extension DataRequest {
+    
     enum ErrorCode: Int {
         case noData = 1
         case dataSerializationFailed = 2
@@ -53,7 +54,7 @@ extension DataRequest {
             
             guard let _ = data else {
                 let failureReason = "Data could not be serialized. Input data was nil."
-                let error = newError(.dataSerializationFailed, failureReason: failureReason)
+                let error = newError(.noData, failureReason: failureReason)
                 return .failure(error)
             }
             
@@ -90,7 +91,7 @@ extension DataRequest {
      
      - returns: The request.
      */
-    
+    @discardableResult
     public func responseObject<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, mapToObject object: T? = nil, context: MapContext? = nil, completionHandler: @escaping (DataResponse<T>) -> Void) -> Self {
         return response(queue: queue, responseSerializer: DataRequest.ObjectMapperSerializer(keyPath, mapToObject: object, context: context), completionHandler: completionHandler)
     }
@@ -136,6 +137,7 @@ extension DataRequest {
      
      - returns: The request.
     */
+    @discardableResult
     public func responseArray<T: Mappable>(queue: DispatchQueue? = nil, keyPath: String? = nil, context: MapContext? = nil, completionHandler: @escaping (DataResponse<[T]>) -> Void) -> Self {
         return response(queue: queue, responseSerializer: DataRequest.ObjectMapperArraySerializer(keyPath, context: context), completionHandler: completionHandler)
     }
